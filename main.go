@@ -50,7 +50,7 @@ func getRad(client *http.Client) (map[string]interface{}, error) {
 }
 
 func getUserIPAndAcID(client *http.Client) (string, string, error) {
-	req, err := http.NewRequest("GET", "http://202.203.208.5/srun_portal_pc?ac_id=0&theme=basic2", strings.NewReader(""))
+	req, err := http.NewRequest("GET", "http://202.203.208.5/", strings.NewReader(""))
 	if err != nil {
 		return "", "", err
 	}
@@ -59,20 +59,24 @@ func getUserIPAndAcID(client *http.Client) (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
+	acID := resp.Request.URL.Query().Get("ac_id")
 	defer resp.Body.Close()
 	document, err := goquery.NewDocumentFromReader(resp.Body)
 	if err != nil {
 		return "", "", err
 	}
-	if userIP, ok := document.Find("#user_ip").First().Attr("value"); ok {
-		if acID, ok := document.Find("#ac_id").First().Attr("value"); ok {
-			return userIP, acID, nil
-		} else {
-			return "", "", errors.New("fail to get ac_id")
-		}
-	} else {
-		return "", "", errors.New("fail to get user_ip")
+	//document.Find("script").EachWithBreak(func(i int, selection *goquery.Selection) bool {
+	//	text := selection.Text()
+	//	if len(text) > 0 {
+	//		fmt.Println(text)
+	//	}
+	//	return true
+	//})
+	if len(acID) == 0 {
+		acID, _ = document.Find("#ac_id").First().Attr("value")
 	}
+	userIP, _ := document.Find("#user_ip").First().Attr("value")
+	return userIP, acID, err
 }
 
 func getChallenge(client *http.Client, userName string, userIP string) (string, error) {
@@ -274,6 +278,21 @@ func doLogin(client *http.Client, config *Config) {
 			if err != nil {
 				Logger.Println(err)
 				return
+			}
+			if len(acID) == 0 {
+				acID = "0"
+			}
+			if len(userIP) == 0 {
+				clientIP, ok := rad["client_ip"]
+				if !ok {
+					Logger.Println("get rad[\"client_ip\"] failed")
+					return
+				}
+				userIP, ok = clientIP.(string)
+				if !ok {
+					Logger.Println("client_ip is not string")
+					return
+				}
 			}
 
 			challenge, err := getChallenge(client, config.UserName, userIP)
