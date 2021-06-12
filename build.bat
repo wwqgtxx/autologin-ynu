@@ -3,6 +3,8 @@ rmdir /S /Q bin
 mkdir bin
 copy config.json bin
 copy config.tmp.json bin
+copy login.bat bin
+copy logout.bat bin
 set CGO_ENABLED=0
 set GOARCH=amd64
 set GOOS=linux

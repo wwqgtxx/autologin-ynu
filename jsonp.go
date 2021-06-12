@@ -38,7 +38,7 @@ func timestampString() string {
 
 func NewJsonp() *Jsonp {
 	return &Jsonp{
-		CallbackString: "jQuery" + randNumString(22) + "_" + randNumString(14),
+		CallbackString: "jQuery" + randNumString(22) + "_" + timestampString(),
 	}
 }
 
