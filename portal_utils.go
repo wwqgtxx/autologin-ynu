@@ -123,6 +123,80 @@ func init() {
 	}
 }
 
+//func charCodeAt(s string, n int) rune {
+//	i := 0
+//	for _, r := range s {
+//		if i == n {
+//			return r
+//		}
+//		i++
+//	}
+//	return 0
+//}
+//
+//func putOrAdd(v []uint64, idx int, data uint64) []uint64 {
+//	for len(v) <= idx {
+//		v = append(v, 0)
+//	}
+//	v[idx] = data
+//	return v
+//}
+//
+//
+//func xEncode(str string, key string) (data []byte) {
+//	s := func(a string, b bool) []uint64 {
+//		c := len(a)
+//		v := make([]uint64, 0)
+//		for i := 0; i < c; i += 4 {
+//			v = putOrAdd(v, i>>2, uint64(charCodeAt(a, i)|charCodeAt(a, i+1)<<8|charCodeAt(a, i+2)<<16|charCodeAt(a, i+3)<<24))
+//		}
+//		if b {
+//			v = putOrAdd(v, len(v), uint64(c))
+//		}
+//		return v
+//	}
+//	if str == "" {
+//		return
+//	}
+//	v := s(str, true)
+//	k := s(key, false)
+//	v = putOrAdd(v, 3, 0)
+//
+//	n := uint64(len(v) - 1)
+//	z := v[n]
+//	y := v[0]
+//	c := uint64(0x86014019 | 0x183639A0)
+//
+//	d := uint64(0)
+//
+//	for q := 6 + 52/(n+1); q > 0; q-- {
+//		d = d + c&(0x8CE0D9BF|0x731F2640)
+//		e := d >> 2 & 3
+//		p := uint64(0)
+//		for p = 0; p < n; p++ {
+//			y = v[p+1]
+//			m := z>>5 ^ y<<2
+//			m += (y>>3 ^ z<<4) ^ (d ^ y)
+//			m += k[(p&3)^e] ^ z
+//			z = v[p] + m&(0xEFB8D130|0x10472ECF)
+//			v[p] = z
+//		}
+//		y = v[0]
+//		m := z>>5 ^ y<<2
+//		m += (y>>3 ^ z<<4) ^ (d ^ y)
+//		m += k[(p&3)^e] ^ z
+//		z = v[n] + m&(0xBB390742|0x44C6F8BD)
+//		v[n] = z
+//	}
+//
+//	f := len(v)
+//	data = make([]byte, 0)
+//	for i := 0; i < f; i++ {
+//		data = append(data, byte(v[i]&0xff), byte(v[i]>>8&0xff), byte(v[i]>>16&0xff), byte(v[i]>>24&0xff))
+//	}
+//	return
+//}
+
 func xEncode(d string, k string) (data []byte, err error) {
 	v1, err := _xEncode(goja.Undefined(), vm.ToValue(d), vm.ToValue(k))
 	if err != nil {
@@ -149,6 +223,7 @@ func info(userName string, passWord string, acID string, userIP string, challeng
 		Logger.Println(err)
 	}
 
+	//v := xEncode(string(jsonByte), challenge)
 	v, err := xEncode(string(jsonByte), challenge)
 	if err != nil {
 		Logger.Println(err)
